@@ -13,7 +13,7 @@ from hnet.modules.dc import (
     DeChunkState,
 )
 from hnet.modules.utils import apply_optimization_params
-
+from hnet.modules.neox.stack import NeoXState
 from .config_hnet import HNetConfig
 
 
@@ -33,11 +33,11 @@ def ste_func(x):
 
 @dataclass
 class HNetState:
-    encoder_state: Optional[IsotropicInferenceParams] = None
+    encoder_state: Optional[Union[IsotropicInferenceParams, NeoXState]] = None
     routing_module_state: Optional[RoutingModuleState] = None
-    main_network_state: Optional[Union["HNetState", IsotropicInferenceParams]] = None
+    main_network_state: Optional[Union["HNetState", IsotropicInferenceParams, NeoXState]] = None
     dechunk_state: Optional[DeChunkState] = None
-    decoder_state: Optional[IsotropicInferenceParams] = None
+    decoder_state: Optional[Union[IsotropicInferenceParams, NeoXState]] = None
 
 
 class HNet(nn.Module):

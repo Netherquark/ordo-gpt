@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Union
 
+from hnet.modules.neox.config import NeoXConfig
 
 @dataclass
 class AttnConfig:
@@ -28,4 +29,5 @@ class HNetConfig:
     vocab_size: int = 256
     ssm_cfg: SSMConfig = field(default_factory=SSMConfig)
     attn_cfg: AttnConfig = field(default_factory=AttnConfig)
+    neox_cfg: NeoXConfig = field(default_factory=NeoXConfig)
     tie_embeddings: bool = False

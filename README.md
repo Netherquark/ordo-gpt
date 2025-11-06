@@ -13,13 +13,12 @@ This framework provides flexible components, utilities, and configuration tools 
 
 ### Features
 
-* Implements **Hierarchical Chunking** to extend GPT-NeoX’s contextual understanding.
+* Implements **Hierarchical Chunking** with GPT-NeoX style attention.
 * Modular deep learning framework with clearly defined architecture.
 * Configurable **HNet** architecture with JSON-based model setup.
 * Utilities for **training**, **tokenization**, and **model evaluation**.
 * **Text generation engine** with prompt-based inference (`generate.py`).
 * **Remote model serving** through an API interface (`serve_hnet_remote.py`).
-* Support for **large-scale model configurations** (e.g., `hnet_1stage_XL`).
 * Extensible architecture for easy experimentation with new layers or configurations.
 
 ---
@@ -29,7 +28,7 @@ This framework provides flexible components, utilities, and configuration tools 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/<your-username>/ordo-gpt.git
+   git clone https://github.com/netherquark/ordo-gpt.git
    ```
 
 2. Navigate to the project directory:
@@ -48,60 +47,23 @@ This framework provides flexible components, utilities, and configuration tools 
 
 ### Usage (Regular)
 
-#### Training the Model
-
-Run the training pipeline using:
-
-```bash
-python src/hnet/hnet/utils/train.py --config src/hnet/configs/hnet_1stage_XL.json
-```
-
-You can modify hyperparameters in the configuration file such as:
-
-* Number of layers
-* Hidden dimension size
-* Maximum sequence length
-* Dropout and learning rate
-
-#### Generating Text
-
-Generate text using a pretrained model with:
-
-```bash
-python src/hnet/generate.py --prompt "Artificial intelligence is transforming"
-```
-
-**Example Output:**
-
-```
-Artificial intelligence is transforming every domain by introducing adaptive systems capable of reasoning through structured context.
-```
-
 #### Running the API Server
 
 Launch the model inference server:
 
 ```bash
-python serve_hnet_remote.py --host 0.0.0.0 --port 8000
+python serve_hnet_remote.py --model-path ~/models/hnet_neox.pt --config-path configs/hnet_neox.json --device cuda --quantize
 ```
 
 Send a request using:
 
 ```bash
-curl -X POST http://localhost:8000/generate -d '{"prompt": "Hello world"}'
+curl -s -X POST "http://localhost:5000/v1/completions"   -H "Content-Type: application/json"   -d '{
+    "prompt": "Glass is an amorphous (non-crystalline) solid. Because it is often transparent and chemically inert, glass has found widespread practical, technological, and decorative use in window panes, tableware, and optics. Some common objects made of glass are ",
+    "max_tokens": 256,
+    "temperature": 0.35
+  }' | jq
 ```
-
----
-
-### Evaluating Models
-
-Evaluate performance, analyze loss, and validate outputs by extending or customizing the training script under:
-
-```
-src/hnet/hnet/utils/train.py
-```
-
-You can also visualize token-level coherence and generation patterns using the hierarchical chunking structure.
 
 ---
 
@@ -109,31 +71,29 @@ You can also visualize token-level coherence and generation patterns using the h
 
 ```json
 {
-  "model_name": "hnet_1stage_XL",
-  "hidden_dim": 2048,
-  "num_layers": 24,
-  "vocab_size": 50257,
-  "max_seq_len": 1024,
-  "dropout": 0.1
+    "arch_layout": ["m4", ["T1m4", ["T26"], "m4T1"], "m4"],
+    "d_model": [1024, 1024, 1536],
+    "d_intermediate": [0, 2816, 4096],
+    "vocab_size": 256,
+    "ssm_cfg": {
+        "chunk_size": 256,
+        "d_conv": 4,
+        "d_state": 128,
+        "expand": 2
+    },
+    "attn_cfg": {
+        "num_heads": [16, 16, 16],
+        "rotary_emb_dim": [32, 32, 48],
+        "window_size": [1023, 1023, -1]
+    },
+    "tie_embeddings": false
 }
 ```
 
 ---
 
-### Dependencies
-
-* Python 3.11
-* PyTorch
-* Transformers
-* Tokenizers
-* NumPy
-* tqdm
-* Flask
-
----
-
 ### License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **GPLv3 License**.
 Refer to the `LICENSE` file for more details.
 

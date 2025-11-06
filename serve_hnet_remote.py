@@ -7,6 +7,7 @@ import json
 import torch
 import argparse
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import os
@@ -45,6 +46,22 @@ MODEL = None
 TOKENIZER = None
 DEVICE = None
 MODEL_ID = "hnet-1stage-L"
+
+class SubnetCORSMiddleware(CORSMiddleware):
+    def is_origin_allowed(self, origin: str) -> bool:
+        if origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1"):
+            return True
+        # Allow anything from 192.168.1.*
+        match = re.match(r"^https?://192\.168\.1\.\d{1,3}(:\d+)?$", origin)
+        return bool(match)
+
+app.add_middleware(
+    SubnetCORSMiddleware,
+    allow_origins=["*"],  # Not used directly; overridden by is_origin_allowed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class CompletionRequest(BaseModel):
     prompt: str
@@ -278,4 +295,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

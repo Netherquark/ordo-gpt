@@ -45,7 +45,7 @@ app = FastAPI(title="HNet OpenAI-compatible Adapter")
 MODEL = None
 TOKENIZER = None
 DEVICE = None
-MODEL_ID = "hnet-1stage-L"
+MODEL_ID = "hnet-neox"
 
 class SubnetCORSMiddleware(CORSMiddleware):
     def is_origin_allowed(self, origin: str) -> bool:
